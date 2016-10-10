@@ -61,7 +61,7 @@ def run():
     a = e.create_agent(LearningAgent)
     
     # specify agent to track
-    e.set_primary_agent(a, enforce_deadline=True)
+    e.set_primary_agent(a, enforce_deadline=False)
     # NOTE: You can set enforce_deadline=False while debugging to
     # allow longer trials
     
