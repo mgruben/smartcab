@@ -21,6 +21,7 @@ class LearningAgent(Agent):
         
         # TODO: Initialize any additional variables here
         self.actions = (None, 'forward', 'left', 'right')
+        self.state = None
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
