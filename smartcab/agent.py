@@ -21,6 +21,7 @@ class LearningAgent(Agent):
         
         # TODO: Initialize any additional variables here
         self.actions = (None, 'forward', 'left', 'right')
+        self.state = None
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -35,6 +36,7 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
+        self.state = inputs
         
         # TODO: Select action according to your policy
         action = random.choice(self.actions)
@@ -59,12 +61,12 @@ def run():
     a = e.create_agent(LearningAgent)
     
     # specify agent to track
-    e.set_primary_agent(a, enforce_deadline=True)
+    e.set_primary_agent(a, enforce_deadline=False)
     # NOTE: You can set enforce_deadline=False while debugging to
     # allow longer trials
     
     # create simulator (uses pygame when display=True, if available)
-    sim = Simulator(e, update_delay=0.5, display=True)
+    sim = Simulator(e, update_delay=0.1, display=True)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
 
