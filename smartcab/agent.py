@@ -18,7 +18,9 @@ class LearningAgent(Agent):
         
         # simple route planner to get next_waypoint
         self.planner = RoutePlanner(self.env, self)
+        
         # TODO: Initialize any additional variables here
+        self.actions = (None, 'forward', 'left', 'right')
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -35,7 +37,7 @@ class LearningAgent(Agent):
         # TODO: Update state
         
         # TODO: Select action according to your policy
-        action = None
+        action = random.choice(self.actions)
 
         # Execute action and get reward
         reward = self.env.act(self, action)
