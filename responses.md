@@ -4,3 +4,9 @@ _**QUESTION**: Observe what you see with the agent's behavior as it takes random
 3. After listening to the lectures on Q-Learning, I admit I **expected** for the car to reach its destination "better" (e.g. more directly) on subsequent iterations, but then I noticed `# TODO: Learn policy based on state, action, reward`, and realized that learning will come later.  
 4. It's a little hard to tell, but it also appears like the agent is, at this point, doing wrong things (e.g. disobeying traffic laws in ways that are likely to bring harm to itself and others).  From what I could tell in `environment.py`, such harmful actions are classified as `Invalid Moves`, and result in a `reward` of `-1.0`.  There were definitely a few `rewards` of `-1.0` in the simulation.  
 5. So, at this point, it seems like we've successfully given movement to an actor which is likely to (unintentionally) inflict harm.  Yikes!
+
+_**QUESTION**: What states have you identified that are appropriate for modeling the **smartcab** and environment? Why do you believe each of these states to be appropriate for this problem?_  
+1. Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
+..1. The state of the light (e.g. `red, green`) is required to know whether the desired next action is presently allowed.  
+..2. Similarly, the location and heading of other cars is important for knowing whether or not our `agent` needs to adjust its desired heading.  Without knowing this information, our `agent` will be unable to perform **collision avoidance**.
+
