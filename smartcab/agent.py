@@ -22,6 +22,11 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.actions = (None, 'forward', 'left', 'right')
         self.state = None
+        
+        # Variables related to Q-learning
+        self.Qvalues = {}
+        self.alpha = 1 # initial learning rate
+        self.gamma = 0.33 # Bellman discount factor
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
