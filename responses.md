@@ -22,8 +22,19 @@ e.g.:
 ..* For instance, consider a smartcab approaching a green light, correctly intending to go straight through the intersection.  If another car approaches the intersection from the smartcab's right, intends to go forward, and should stop at the red light but doesn't, the smartcab must correctly ascertain that it has to stop, or else it will contribute to an accident it could otherwise have prevented, even though it's not the case that it caused the accident all by itself.  
 ..* Even though there are 128 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
 
-
 _**QUESTION**: What changes do you notice in the agent's behavior when compared to the basic driving agent when random actions were always taken? Why is this behavior occurring?_  
 1. Previously, the smartcab was only taking random actions, and unfortunately no mechanism was in place to choose better on subsequent trials.  Now, however, although the smartcab begins by taking random actions (many of which are invalid), by the third or fourth trial, the number of invalid actions approaches 0, and the smartcab appears to take a fairly direct route to the destination.  
 2.  Interestingly, by the 7th or eighth trial (though perhaps sooner), the smartcab develops a tendency to loop, and never remains at an intersection.  While comical, this is probably also not an ideal policy in the abstract, since it's wasteful of gas, increases wear on the vehicle, and greatly confuses the passengers.  However, perhaps that behavior can be eliminated by tweaking variables in the Q-Learning algorithm.
 
+_**QUESTION**: Report the different values for the parameters tuned in your basic implementation of Q-Learning. For which set of parameters does the agent perform best? How well does the final driving agent perform?_  
+1. `epsilon`, interestingly enough, was not used (discussion follows).  
+2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.
+3. `gamma` was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.  
+..1. At a gamma of 1, the car remains stationary always.  
+..2. At a gamma of 0.9, the car very quickly favors looping.  
+..3. Even at a gamma of 0.33, the car begins to enter a looping behavior within 5 or 6 total trials.  
+..4. At a gamma of 0.1, the tendency to loop is diminished, but looping occurs eventually after the ~12th trial.  
+..5. At a gamma of 0.03, it appears that the looping behaviour does not reappear, even up to 100 trials.  
+4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent does not make invalid actions.  In other words, it obeys traffic signals, and does not act in a way that would cause a collision with other vehicles on the roadway.  The success rate of this agent rapidly approaches 1.0 over 100 trials.
+
+_**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? How would you describe an optimal policy for this problem?_  
