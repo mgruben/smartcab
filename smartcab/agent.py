@@ -28,7 +28,17 @@ class LearningAgent(Agent):
         self.weights = [0, 0, 0, 0] # stores preferences for current act
         self.Qiterations = {} # used to reduce alpha
         self.alpha = 1 # initial learning rate
-        self.gamma = 0.33 # Bellman discount factor
+        self.gamma = 0.03 # the discount factor
+        '''
+        At a gamma of 1, the car remains stationary always.
+        At a gamma of 0.9, the car very quickly favors looping.
+        Even at a gamma of 0.33, the car begins to enter a looping
+        behavior within 5 or 6 total trials
+        At a gamma of 0.1, the tendency to loop is diminished, but
+        looping occurs eventually after the ~12th trial.
+        At a gamma of 0.03, it appears that the looping behaviour does
+        not reappear, even up to 100 trials.
+        '''
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
