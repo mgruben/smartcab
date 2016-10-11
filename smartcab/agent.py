@@ -120,7 +120,8 @@ class LearningAgent(Agent):
         # knowledge it already possesses about that state-action pair,
         # and should not "learn" as much from encountering the same
         # scenario again.
-        iterations = self.Qiterations.setdefault((self.state, action), 1)
+        iterations = self.Qiterations.setdefault((self.state, action),
+            1)
         self.Qiterations[(self.state, action)] += 1
         self.alpha = 1.0 / iterations
         
@@ -133,7 +134,8 @@ class LearningAgent(Agent):
         # Look ahead one turn to find s' (state_prime)
         self.next_waypoint = self.planner.next_waypoint()
         inputs = self.env.sense(self)
-        self.state_prime = (self.next_waypoint, inputs['light'], inputs['left'], inputs['oncoming'], inputs['right'])
+        self.state_prime = (self.next_waypoint, inputs['light'],
+            inputs['left'], inputs['oncoming'], inputs['right'])
         
         # Determine the utility of the next state.
         # 
@@ -145,7 +147,8 @@ class LearningAgent(Agent):
         # state-action pair, we award a high initial Q value to favor
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
-            self.weights[i] = self.Qtable.setdefault((self.state_prime, action_prime), 5)
+            self.weights[i] = self.Qtable.setdefault((self.state_prime,
+                action_prime), 5)
         self.maxQ_new = max(self.weights)
         
         # Update Q for the current state with the just-calculated
