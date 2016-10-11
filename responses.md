@@ -15,11 +15,13 @@ Every state in `inputs` (that is, in `self.env.sense(self)`) is important for mo
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_
 
 1. From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).  
-   ```python
-{'green', 'oncoming': None, 'right': None, 'left': None}
-{'red', 'oncoming': None, 'right': None, 'left': 'left'}
-{'red', 'oncoming': 'right', 'right': None, 'left': 'forward'}
-```
+
+    ```python
+    {'green', 'oncoming': None, 'right': None, 'left': None}
+    {'red', 'oncoming': None, 'right': None, 'left': 'left'}
+    {'red', 'oncoming': 'right', 'right': None, 'left': 'forward'}
+    ```
+
 2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
  * For instance, consider a smartcab approaching a green light, correctly intending to go straight through the intersection.  If another car approaches the intersection from the smartcab's right, intends to go forward, and should stop at the red light but doesn't, the smartcab must correctly ascertain that it has to stop, or else it will contribute to an accident it could otherwise have prevented, even though it's not the case that it caused the accident all by itself.  
  * Even though there are 128 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
