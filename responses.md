@@ -36,7 +36,6 @@ _**QUESTION**: Report the different values for the parameters tuned in your basi
  3. Even at a gamma of 0.33, the car begins to enter a looping behavior within 5 or 6 total trials.
  4. At a gamma of 0.1, the tendency to loop is diminished, but looping occurs eventually after the ~12th trial.
  5. At a gamma of 0.03, it appears that the looping behaviour does not reappear, even up to 100 trials.
-
 4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent obeys traffic signals, but occasionally acts in a way that would **cause a collision** with other vehicles on the roadway (yikes!).  The success rate of this agent rapidly approaches 1.0 over 100 trials.
 5. The occasional collisions, I assert, are because of a low number of trials relative to the probability of encountering any given other-vehicle configuration.  Since encountering other vehicles is relatively rare, the smartcab doesn't have time in only 100 trials to learn not to ram into them.
 6. By increasing the number of trials to 1000, the smartcab eventually encounters enough other-vehicle state-action pairs to "learn" the correct actions to take in those cases.
