@@ -14,7 +14,7 @@ Every state in `inputs` (that is, in `self.env.sense(self)`) is important for mo
 
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_
 
-1. From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).  
+1. From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).
 
     ```python
     {'green', 'oncoming': None, 'right': None, 'left': None}
