@@ -6,19 +6,19 @@ _**QUESTION**: Observe what you see with the agent's behavior as it takes random
 5. So, at this point, it seems like we've successfully given movement to an actor which is likely to (unintentionally) inflict harm.  Yikes!
 
 _**QUESTION**: What states have you identified that are appropriate for modeling the **smartcab** and environment? Why do you believe each of these states to be appropriate for this problem?_  
-1. Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
+Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
  1. The state of the light (e.g. `red, green`) is required to know whether the desired next action is presently allowed.  
  2. Similarly, the location and heading of other cars is important for knowing whether or not our `agent` needs to adjust its desired heading.  Without knowing this information, our `agent` will be unable to perform **collision avoidance**.
 
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_  
-1. From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).  
+* From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).  
 ```python
 {'green', 'oncoming': None, 'right': None, 'left': None}
 {'red', 'oncoming': None, 'right': None, 'left': 'left'}
 {'red', 'oncoming': 'right', 'right': None, 'left': 'forward'}
-```  
+```
 
-2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
+* This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
  * For instance, consider a smartcab approaching a green light, correctly intending to go straight through the intersection.  If another car approaches the intersection from the smartcab's right, intends to go forward, and should stop at the red light but doesn't, the smartcab must correctly ascertain that it has to stop, or else it will contribute to an accident it could otherwise have prevented, even though it's not the case that it caused the accident all by itself.  
  * Even though there are 128 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
 
@@ -28,15 +28,15 @@ _**QUESTION**: What changes do you notice in the agent's behavior when compared 
 
 _**QUESTION**: Report the different values for the parameters tuned in your basic implementation of Q-Learning. For which set of parameters does the agent perform best? How well does the final driving agent perform?_  
 1. `epsilon`, interestingly enough, was not used (discussion follows).  
-2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.  
-3. `gamma` was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.  
- 1. At a gamma of 1, the car remains stationary always.  
- 2. At a gamma of 0.9, the car very quickly favors looping.  
- 3. Even at a gamma of 0.33, the car begins to enter a looping behavior within 5 or 6 total trials.  
- 4. At a gamma of 0.1, the tendency to loop is diminished, but looping occurs eventually after the ~12th trial.  
- 5. At a gamma of 0.03, it appears that the looping behaviour does not reappear, even up to 100 trials.  
-4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent obeys traffic signals, but occasionally acts in a way that would **cause a collision** with other vehicles on the roadway (yikes!).  The success rate of this agent rapidly approaches 1.0 over 100 trials.  
-5. The occasional collisions, I assert, are because of a low number of trials relative to the probability of encountering any given other-vehicle configuration.  Since encountering other vehicles is relatively rare, the smartcab doesn't have time in only 100 trials to learn not to ram into them.  
+2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.
+3. `gamma` was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.
+ 1. At a gamma of 1, the car remains stationary always.
+ 2. At a gamma of 0.9, the car very quickly favors looping.
+ 3. Even at a gamma of 0.33, the car begins to enter a looping behavior within 5 or 6 total trials.
+ 4. At a gamma of 0.1, the tendency to loop is diminished, but looping occurs eventually after the ~12th trial.
+ 5. At a gamma of 0.03, it appears that the looping behaviour does not reappear, even up to 100 trials.
+4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent obeys traffic signals, but occasionally acts in a way that would **cause a collision** with other vehicles on the roadway (yikes!).  The success rate of this agent rapidly approaches 1.0 over 100 trials.
+5. The occasional collisions, I assert, are because of a low number of trials relative to the probability of encountering any given other-vehicle configuration.  Since encountering other vehicles is relatively rare, the smartcab doesn't have time in only 100 trials to learn not to ram into them.
 6. By increasing the number of trials to 1000, the smartcab eventually encounters enough other-vehicle state-action pairs to "learn" the correct actions to take in those cases.
 
 _**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? How would you describe an optimal policy for this problem?_  
