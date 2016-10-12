@@ -34,7 +34,7 @@ _**OPTIONAL**: How many states in total exist for the **smartcab** in this envir
     {'next_waypoint': 'forward', 'green', 'oncoming': None, 'left': None}
     {'next_waypoint': 'left', 'red', 'oncoming': None, 'left': 'left'}
     {'next_waypoint': 'right', 'red', 'oncoming': 'right', 'left': 'forward'}
-```
+    ```
 
 2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
  * For instance, consider a smartcab approaching a red light, and intends to turn right at the intersection.  If another car approaches the intersection from the smartcab's left and intends to go forward, the smartcab must correctly ascertain that it must wait for the car to pass, even if the smartcab can legally turn right from a red light after having stopped first.  
@@ -42,7 +42,16 @@ _**OPTIONAL**: How many states in total exist for the **smartcab** in this envir
 
 _**QUESTION**: What changes do you notice in the agent's behavior when compared to the basic driving agent when random actions were always taken? Why is this behavior occurring?_
 
-1. Previously, the smartcab was only taking random actions, and unfortunately no mechanism was in place to choose better on subsequent trials.  Now, however, although the smartcab begins by taking random actions (many of which are invalid), by the third or fourth trial, the number of invalid actions approaches 0, and the smartcab appears to take a fairly direct route to the destination.  
+1. Previously, the smartcab was only taking random actions, and unfortunately no mechanism was in place to choose better on subsequent trials.  Now, however, although the smartcab begins by taking random actions (many of which are invalid), by the third or fourth trial, the number of invalid actions approaches 0, and the smartcab appears to take a fairly direct route to the destination.
+
+   In short, this is because the smartcab is seeking rewards and remembering consequences, and the rewards have been constructed in a way that leads to the observed behavior.  In more depth:
+   
+ 1. The smartcab is determining its state (i.e. suggested next move, the color of the traffic light, and the location and heading of nearby cars).
+ 2. The smartcab is updating its Q-table (think of it like its memory for all scenarios) with the expected reward for any of the actions it could take in the current state (i.e. `left`, `forward`, `right`, or remain stationary).  If the smartcab hasn't been in this state before, it assigns the actions a high reward, so that it explores things it doesn't know well yet.
+ 3. The smartcab takes the action with the highest Q-value in its table for this state.  It breaks ties randomly, because there isn't a sensible way to break them systematically.
+ 4. After having acted, the smartcab again determines its state and updates its Q-table, except this time it doesn't care about any one action in particular, but rather about whether there is some high-Q action available to it now.  (In essence, it knows it can make decisions later, but it's wondering if the last action it took it to a land of meaningful opportunity, and updates the value of that previous decision accordingly).
+ 5. As discussed above, there are 192 distinct states, and 4 possible actions for each of these states.  Accordingly, it takes a while for the Q-table in this simulation to converge to consistent, optimal behavior.
+   
 2. Interestingly, by the 7th or eighth trial (though perhaps sooner), the smartcab develops a tendency to loop, and never remains at an intersection.  While comical, this is probably also not an ideal policy in the abstract, since it's wasteful of gas, increases wear on the vehicle, and greatly confuses the passengers.  However, perhaps that behavior can be eliminated by tweaking variables in the Q-Learning algorithm.
 
 _**QUESTION**: Report the different values for the parameters tuned in your basic implementation of Q-Learning. For which set of parameters does the agent perform best? How well does the final driving agent perform?_
