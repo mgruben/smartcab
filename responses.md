@@ -8,9 +8,14 @@ _**QUESTION**: Observe what you see with the agent's behavior as it takes random
 
 _**QUESTION**: What states have you identified that are appropriate for modeling the **smartcab** and environment? Why do you believe each of these states to be appropriate for this problem?_
 
-1. Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
+1. Many, but not all, of the elements in `inputs` (that is, in `self.env.sense(self)`) are important for modeling the **smartcab** and its environment.  
  1. The state of the light (e.g. `red, green`) is required to know whether the desired next action is presently allowed.  
  2. Similarly, the location and heading of other cars is important for knowing whether or not our `agent` needs to adjust its desired heading.  Without knowing this information, our `agent` will be unable to perform **collision avoidance**.
+ 3. However, it's important to note that the information provided by `right` is redundant to the information provided by `light`.  Specifically, if the `light` is `green`, then traffic which is to the smartcab's `right` should yield to the smartcab in all circumstances (i.e. should not turn `left` or go `forward`, because their light is `red`, and it should only turn `right` when there is no traffic going `forward` from its `left`).
+ 
+    In reality, it is perhaps paramount for a smartcab to pay attention to whether there is traffic to its right.  Actors in the wild don't always yield (e.g. sometimes turn right into a far left lane to miss traffic from the left, sometimes turn right without noticing traffic from the left), and a smartcab shouldn't ignore the possibility of a collision when right-of-way dictates that none should occur.  
+    Nevertheless, for the purposes of this exercise, it is appropriate to assume that other actors will obey traffic laws at all times.  That being the case, information about cars to the smartcab's `right` is redundant, and is therefore not an appropriate state to consider.
+
 2. Additionally, it is practically important to include `self.planner.next_waypoint()`, since the reinforcement provided by `Environment.act()` considers whether the action taken is or isn't the action which `RoutePlanner.next_waypoint()` expects.
 
    In one sense, we want the smartcab to have access to all of the information it's being graded on, so that it can learn for itself the way to get the best grade.  
@@ -19,17 +24,19 @@ _**QUESTION**: What states have you identified that are appropriate for modeling
 
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_
 
-1. From mere permutations of the `inputs` vector, there are 128 distinct states.  This is because there are two states for `light`, and four for each of `oncoming`, `right`, and `left` (specifically, `None`, `forward`, `right`, and `left`).
+1. From mere permutations of the `inputs` vector, there are 64 distinct states.  This is because there are two states for `light`, and four for each of `oncoming` and `left` (specifically, `None`, `forward`, `right`, and `left`).  (Note from the above question that `right` is being ignored, as it contains only redundant information).  Also, from `RoutePlanner.next_waypoint()`, there are three additional, distinct states (`right`, `left`, and `forward`).
+
+   Accordingly, there are a total of **192 distinct states** in this smartcab environment.
 
     ```python
-    {'green', 'oncoming': None, 'right': None, 'left': None}
-    {'red', 'oncoming': None, 'right': None, 'left': 'left'}
-    {'red', 'oncoming': 'right', 'right': None, 'left': 'forward'}
-    ```
+    {'next_waypoint': 'forward', 'green', 'oncoming': None, 'left': None}
+    {'next_waypoint': 'left', 'red', 'oncoming': None, 'left': 'left'}
+    {'next_waypoint': 'right', 'red', 'oncoming': 'right', 'left': 'forward'}
+```
 
 2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
- * For instance, consider a smartcab approaching a green light, correctly intending to go straight through the intersection.  If another car approaches the intersection from the smartcab's right, intends to go forward, and should stop at the red light but doesn't, the smartcab must correctly ascertain that it has to stop, or else it will contribute to an accident it could otherwise have prevented, even though it's not the case that it caused the accident all by itself.  
- * Even though there are 128 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
+ * For instance, consider a smartcab approaching a red light, and intends to turn right at the intersection.  If another car approaches the intersection from the smartcab's left and intends to go forward, the smartcab must correctly ascertain that it must wait for the car to pass, even if the smartcab can legally turn right from a red light after having stopped first.  
+ * Even though there are 192 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
 
 _**QUESTION**: What changes do you notice in the agent's behavior when compared to the basic driving agent when random actions were always taken? Why is this behavior occurring?_
 

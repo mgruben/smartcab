@@ -103,7 +103,7 @@ class LearningAgent(Agent):
         # Update state with the suggested action along with
         # raw values from inputs, ordered to clockwise orientation
         self.state = (self.next_waypoint, inputs['light'], 
-            inputs['left'], inputs['oncoming'], inputs['right'])
+            inputs['left'], inputs['oncoming'])
         
         # Select action according to your policy
         # If a state-action pair hasn't been considered yet, award
@@ -146,7 +146,7 @@ class LearningAgent(Agent):
         self.next_waypoint = self.planner.next_waypoint()
         inputs = self.env.sense(self)
         self.state_prime = (self.next_waypoint, inputs['light'],
-            inputs['left'], inputs['oncoming'], inputs['right'])
+            inputs['left'], inputs['oncoming'])
         
         # Determine the utility of the next state.
         # 
@@ -195,7 +195,7 @@ def run():
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
 
-    sim.run(n_trials=1000)  # run for a specified number of trials
+    sim.run(n_trials=600)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
 
