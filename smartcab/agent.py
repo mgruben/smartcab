@@ -115,7 +115,7 @@ class LearningAgent(Agent):
         for i, action in enumerate(self.actions):
             self.weights[i] = \
                 self.Qtable.setdefault((self.state, action), 5)
-        
+
         # The next action is the highest-Q-value action
         action = self.actions[self.weights.index(max(self.weights))]
         
@@ -147,7 +147,7 @@ class LearningAgent(Agent):
         inputs = self.env.sense(self)
         self.state_prime = (self.next_waypoint, inputs['light'],
             inputs['left'], inputs['oncoming'])
-        
+
         # Determine the utility of the next state.
         # 
         # While previously we were concerned with which action to take,
@@ -173,7 +173,7 @@ class LearningAgent(Agent):
         
 
         print "LearningAgent.update(): " + \
-        "deadline = {}, inputs = {}, ".format(deadline, inputs) + \
+        "deadline = {}, state = {}, ".format(deadline, self.state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
 def run():
