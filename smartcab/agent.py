@@ -50,10 +50,7 @@ class LearningAgent(Agent):
         Takes the next "best" action as defined by the Q-Learning
         algorithm.
         
-        First, the next waypoint as determined by the route planner
-        is obtained.
-        
-        Next, the smartcab determines its state (that is, which action
+        First, the smartcab determines its state (that is, which action
         the route planner suggests next, the current light color, where
         the nearby cars are, and in which direction are those cars
         travelling).
@@ -65,6 +62,8 @@ class LearningAgent(Agent):
         costs and benefits, consult environment.Environment.act().
         
         The smartcab then takes the action with the highest benefit.
+        If multiple actions tie for the highest benefit, one of the
+        tieing actions is chosen at random.
         
         The smartcab then peeks ahead to the highest possible benefit
         which can be obtained from the next action it would take,
@@ -117,7 +116,10 @@ class LearningAgent(Agent):
                 self.Qtable.setdefault((self.state, action), 5)
 
         # The next action is the highest-Q-value action
-        action = self.actions[self.weights.index(max(self.weights))]
+        # if tie, the next action is randomly chosen from among ties
+        current_max = max(self.weights)
+        action_ties = [i for i, w in enumerate(self.weights) if w == current_max]
+        action = self.actions[random.choice(action_ties)]
         
         # Keep track of how many times this action was chosen for
         # this state, and reduce alpha accordingly.
