@@ -8,9 +8,14 @@ _**QUESTION**: Observe what you see with the agent's behavior as it takes random
 
 _**QUESTION**: What states have you identified that are appropriate for modeling the **smartcab** and environment? Why do you believe each of these states to be appropriate for this problem?_
 
-Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
+1. Every state in `inputs` (that is, in `self.env.sense(self)`) is important for modeling the **smartcab** and its environment.  
  1. The state of the light (e.g. `red, green`) is required to know whether the desired next action is presently allowed.  
  2. Similarly, the location and heading of other cars is important for knowing whether or not our `agent` needs to adjust its desired heading.  Without knowing this information, our `agent` will be unable to perform **collision avoidance**.
+2. Additionally, it is practically important to include `self.planner.next_waypoint()`, since the reinforcement provided by `Environment.act()` considers whether the action taken is or isn't the action which `RoutePlanner.next_waypoint()` expects.
+
+   In one sense, we want the smartcab to have access to all of the information it's being graded on, so that it can learn for itself the way to get the best grade.  
+   In another, broader sense, reinforcement learning is a _slow_ process, unless feedback can be provided fairly regularly during the process.  To use an analogy, it's going to take someone a long time to learn the rules of football if you only tell them 'good job' after every game they play, hide the scoreboard from them, and don't let them know when they or anyone else got a penalty.  
+   Accordingly, we can imagine that grading the smartcab according to `RoutePlanner.next_waypoint()` as injecting domain knowledge into our Q-Learning algorithm (where it _should_ go, except in certain circumstances).  Certainly we hope that the smartcab will improve on this suggestion (specifically, by not crashing into other cars or disobeying traffic signals), but this frequent feedback is crucial to rapidly developing a sensible policy.
 
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_
 

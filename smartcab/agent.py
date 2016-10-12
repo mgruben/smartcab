@@ -53,9 +53,10 @@ class LearningAgent(Agent):
         First, the next waypoint as determined by the route planner
         is obtained.
         
-        Next, the smartcab determines its state (that is, the light
-        color, what are the nearby cars, and in which direction
-        are those cars travelling).
+        Next, the smartcab determines its state (that is, which action
+        the route planner suggests next, the current light color, where
+        the nearby cars are, and in which direction are those cars
+        travelling).
         
         Next, the smartcab determines the cost or benefit of the
         potential actions it could take.  These potential actions,
@@ -81,6 +82,16 @@ class LearningAgent(Agent):
         '''
         # Gather inputs
         # from route planner, also displayed by simulator
+        # 
+        # This is the only way the smartcab has an idea of which
+        # direction it _should_ be taking.
+        #
+        # Otherwise, until the car reached the destination, it could
+        # only receive negative feedback, such as when it collides with
+        # another car, or when it disobeys a traffic signal.
+        # 
+        # Very quickly, then, this would lead the car to remain
+        # stationary (and wait for the destination to come to it?).
         self.next_waypoint = self.planner.next_waypoint()
         
         
@@ -89,8 +100,8 @@ class LearningAgent(Agent):
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
 
-        # Update state with the raw values from inputs,
-        # reordered to clockwise orientation
+        # Update state with the suggested action along with
+        # raw values from inputs, ordered to clockwise orientation
         self.state = (self.next_waypoint, inputs['light'], 
             inputs['left'], inputs['oncoming'], inputs['right'])
         
