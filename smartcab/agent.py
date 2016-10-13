@@ -29,9 +29,9 @@ class LearningAgent(Agent):
         self.state = None
         
         # Initialize variables for statistics tracking
-        self.success = np.zeros(2000)
-        self.invalid = np.zeros(2000)
-        self.wander = np.zeros(2000)
+        self.success = np.zeros(5000)
+        self.invalid = np.zeros(5000)
+        self.wander = np.zeros(5000)
         self.trial = 0
         
         # Variables related to Q-learning
@@ -199,15 +199,11 @@ class LearningAgent(Agent):
         "deadline = {}, state = {}, ".format(deadline, self.state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
-def plotWander(w):
-    plt.plot(w, "o")
-    plt.title("Wandering over time")
+def scatter(a, t):
+    plt.plot(a, "o")
+    plt.title(t)
     plt.show()
 
-def plotInvalid(i):
-    plt.plot(i, "o")
-    plt.title("Invalid actions over time")
-    plt.show()
 
 def run():
     """Run the agent for a finite number of trials."""
@@ -228,10 +224,12 @@ def run():
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
 
-    sim.run(n_trials=2000)  # run for a specified number of trials
+    sim.run(n_trials=5000)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
-    plotInvalid(a.invalid)
+    scatter(a.success, "Success over time")
+    scatter(a.invalid, "Invalid actions over time")
+    scatter(a.wander, "Off-waypoint actions over time")
 
 if __name__ == '__main__':
     run()
