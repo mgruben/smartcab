@@ -3,6 +3,11 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 
+# import packages for statistics and data analysis
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
@@ -22,6 +27,12 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.actions = (None, 'forward', 'left', 'right')
         self.state = None
+        
+        # Initialize variables for statistics tracking
+        self.success = np.zeros(2000)
+        self.invalid = np.zeros(2000)
+        self.wander = np.zeros(2000)
+        self.trial = 0
         
         # Variables related to Q-learning
         self.Qtable = {} # The Q-Table
@@ -141,6 +152,16 @@ class LearningAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
         
+        # Track statistics
+        if reward == 12:
+            self.success[self.trial] = 1
+            self.trial += 1
+        elif reward == -1:
+            self.invalid[self.trial] += 1
+        elif reward == -0.5:
+            self.wander[self.trial] += 1
+        elif deadline == 0:
+            self.trial += 1
         
         # Learn policy based on state, action, reward
         
@@ -178,6 +199,16 @@ class LearningAgent(Agent):
         "deadline = {}, state = {}, ".format(deadline, self.state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
+def plotWander(w):
+    plt.plot(w, "o")
+    plt.title("Wandering over time")
+    plt.show()
+
+def plotInvalid(i):
+    plt.plot(i, "o")
+    plt.title("Invalid actions over time")
+    plt.show()
+
 def run():
     """Run the agent for a finite number of trials."""
     
@@ -197,10 +228,10 @@ def run():
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
 
-    sim.run(n_trials=600)  # run for a specified number of trials
+    sim.run(n_trials=2000)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
-
+    plotInvalid(a.invalid)
 
 if __name__ == '__main__':
     run()
