@@ -3,6 +3,12 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 
+# import packages for statistics and data analysis
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
@@ -22,6 +28,14 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.actions = (None, 'forward', 'left', 'right')
         self.state = None
+        
+        # Initialize variables for statistics tracking
+        self.N = 1000
+        self.success = np.zeros(self.N)
+        self.invalid = np.zeros(self.N)
+        self.wander = np.zeros(self.N)
+        self.trial = 0
+        self.trips_failed = 0
         
         # Variables related to Q-learning
         self.Qtable = {} # The Q-Table
@@ -141,6 +155,17 @@ class LearningAgent(Agent):
         # Execute action and get reward
         reward = self.env.act(self, action)
         
+        # Track statistics
+        if reward == 12:
+            self.success[self.trial] = 1
+            self.trial += 1
+        elif reward == -1:
+            self.invalid[self.trial] += 1
+        elif reward == -0.5:
+            self.wander[self.trial] += 1
+        elif deadline == 0:
+            self.trial += 1
+            self.trips_failed += 1
         
         # Learn policy based on state, action, reward
         
@@ -178,6 +203,44 @@ class LearningAgent(Agent):
         "deadline = {}, state = {}, ".format(deadline, self.state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
+def scatter(a, t):
+    plt.plot(a, "o")
+    plt.title(t)
+    plt.show()
+
+def nanCatOne(a):
+    return [float('nan') if x == 1 else x for x in a]
+
+def nanCatZero(a):
+    return [float('nan') if x == 0 else x for x in a]
+    
+def allScatter(a, N):
+    success = nanCatOne(a.success)
+    m = 4
+    l = len(success)
+    w = 33
+    plt.plot(success, "v", label="Trip Failed", color="green", markersize=2*m)
+    
+    plt.plot(pd.rolling_mean(a.invalid, window=w), label="Rolling invalid mean", color = "blue")
+    plt.plot(pd.rolling_mean(a.wander, window=w), label="Rolling off-waypoint mean", color = "red")
+    
+    sum_invalid = int(sum(a.invalid))
+    sum_wander = int(sum(a.wander))
+    
+    invalid = nanCatZero(a.invalid)
+    wander = nanCatZero(a.wander)
+    plt.plot(invalid, "|", label="Invalid actions", color="blue", markersize=2*m)
+    plt.plot(wander, "|", label="Off-waypoint actions", color="red", markersize=2*m)
+    
+    t = str(N) + " trials, gamma = " + str(a.gamma) + "\n" + str(a.trips_failed) + " trips failed, " + str(sum_invalid) + " invalid actions, " + str(sum_wander) + " off-waypoint actions"
+    plt.title(t)
+    plt.ylabel("Number of Occurrences")
+    plt.xlabel("Trial Number")
+    
+    plt.legend()
+    
+    plt.show()
+
 def run():
     """Run the agent for a finite number of trials."""
     
@@ -196,11 +259,11 @@ def run():
     sim = Simulator(e, update_delay=0, display=False)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
-
-    sim.run(n_trials=600)  # run for a specified number of trials
+    N = 1000
+    sim.run(n_trials=N)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
-
+    allScatter(a, N)
 
 if __name__ == '__main__':
     run()
