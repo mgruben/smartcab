@@ -34,7 +34,7 @@ _**OPTIONAL**: How many states in total exist for the **smartcab** in this envir
     {'next_waypoint': 'forward', 'green', 'oncoming': None, 'left': None}
     {'next_waypoint': 'left', 'red', 'oncoming': None, 'left': 'left'}
     {'next_waypoint': 'right', 'red', 'oncoming': 'right', 'left': 'forward'}
-    ```
+```
 
 2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
  * For instance, consider a smartcab approaching a red light, and intends to turn right at the intersection.  If another car approaches the intersection from the smartcab's left and intends to go forward, the smartcab must correctly ascertain that it must wait for the car to pass, even if the smartcab can legally turn right from a red light after having stopped first.  
@@ -57,13 +57,15 @@ _**QUESTION**: What changes do you notice in the agent's behavior when compared 
 _**QUESTION**: Report the different values for the parameters tuned in your basic implementation of Q-Learning. For which set of parameters does the agent perform best? How well does the final driving agent perform?_
 
 1. `epsilon`, interestingly enough, was not used (discussion follows).  
-2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.
-3. `gamma` was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.
- 1. At a gamma of 1, the car remains stationary always.
- 2. At a gamma of 0.9, the car very quickly favors looping.
- 3. Even at a gamma of 0.33, the car begins to enter a looping behavior within 5 or 6 total trials.
- 4. At a gamma of 0.1, the tendency to loop is diminished, but looping occurs eventually after the ~12th trial.
- 5. At a gamma of 0.03, it appears that the looping behaviour does not reappear, even up to 100 trials.
+2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.  For comparison, static `alpha` values were used as below:
+ 1. For a static `alpha` of 1, the difference in performance between a dynamic `alpha` is negligible.
+ 2. For a static `alpha` of 0.75, the number of invalid and off-waypoint actions increased somewhat.
+ 3. This trend continued as `alpha` decreased to 0.5, 0.25, 0.1, 0.02, and 0.01.
+3. `gamma` (as hinted by the graphics above) was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.
+ 1. At a `gamma` of 1, the smartcab's behavior tends depend on its very early encounters.  Sometimes, it reaches the target fairly frequently, but it takes unnecessary actions.  At other times, it prefers taking many unnecessary actions, and reaches the target far less frequently.
+ 2. For `gammas` between 0.9 and 0.2, the car very quickly favors looping, and thus takes many unnecessary actions.
+ 3. At a `gamma` of 0.2, the tendency to loop begins to diminish.
+ 4. For `gammas` between 0.15 and 0, there is no noticeable difference in behavior.  Taking unnecessary actions and taking invalid actions are minimized.
 4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent obeys traffic signals, but occasionally acts in a way that would **cause a collision** with other vehicles on the roadway (yikes!).  The success rate of this agent rapidly approaches 1.0 over 100 trials.
 5. The occasional collisions, I assert, are because of a low number of trials relative to the probability of encountering any given other-vehicle configuration.  Since encountering other vehicles is relatively rare, the smartcab doesn't have time in only 100 trials to learn not to ram into them.
 6. By increasing the number of trials to 1000, the smartcab eventually encounters enough other-vehicle state-action pairs to "learn" the correct actions to take in those cases.
