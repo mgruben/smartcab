@@ -72,10 +72,13 @@ _**QUESTION**: Report the different values for the parameters tuned in your basi
 
 _**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? How would you describe an optimal policy for this problem?_
 
-1. The resulting agent quickly approaches an optimal policy.  
+1. To me, an **optimal policy** is one that mirrors Asimov:
+ 1. The smartcab never collides with another vehicle or allows another vehicle to collide with it,
+ 2. it never disobeys traffic laws, and
+ 3. it always reaches its destination, so long as doing so is consistent with the above two.
+2. The resulting agent quickly approaches, but does not quite achieve, an optimal policy.  
  1. After the first few trials, the agent generally attempts to head toward the destination along the straight-line Manhattan path.  
  2. For the next hundred or so trials, the agent will occasionally encounter other vehicles.  As it encounters other vehicles rarely, it is uncertain of the action it should take in these cases.  This usually results in collisions.  
- 3. After the next few hundred trials, the agent has learned enough about other vehicles to avoid running into them.
-2. To me, an optimal policy would be able to discern between otherwise equivalent paths, and to take the path which allows forward movement at the present time.  This, however, I think is limited by the waypoints which are provided to the agent by the RoutePlanner.  
-3. Additionally, an optimal policy would be able to identify slowdowns ahead and to take an alternate route which, while not usually better, would be better whenever the original route has "traffic."
-4. Finally, an optimal policy would be able to exploit inherent regularity in traffic signalling to choose a path while taking into account the amount of time which will be spent at red lights.  This could simply be using existing "green wave" traffic signal design, or it could be switching to an alternate route when the agent realizes that the lights on the current path will waste a lot of its time.
+ 3. After the next few hundred trials, the agent has learned enough about other vehicles to avoid running into them most of the time.
+ 4. However, it bears mentioning that collisions never fully go away, and neither do off-waypoint actions.
+3. While none of the `alpha` or `gamma` values used in this exercise resulted in the above **optimal policy**, when `alpha = 1` and `gamma = 0.03`, the smartcab came the closest to the optimal polocy.  In those trials, over 1000 runs, only about 3-4 trips were failed, only about 40 invalid actions were taken, and only about 40 off-waypoint actions were taken.  These rates place it well below human drivers in terms of performance, so such an actor should _definitely_ not be set loose on the roads.  Nevertheless, it is an impressive accomplishment for such a simple algorithm to produce.
