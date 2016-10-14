@@ -58,14 +58,14 @@ _**QUESTION**: Report the different values for the parameters tuned in your basi
 
 1. `epsilon`, interestingly enough, was not used (discussion follows).  
 2. `alpha` was dynamic in this algorithm, always being the inverse of the number of times the Q-Learning algorithm had encountered the current state-action pair.  Thus, initially, alpha is 1, then 0.5, then 0.33, etc. for a particular state in which that action has already been chosen.  This has the effect of replacing `epsilon`'s simulated annealing effect, as over time, the learning rate "cools" just the same, though by a different calculation.  For comparison, static `alpha` values were used as below:
- 1. For a static `alpha` of 1, the difference in performance between a dynamic `alpha` is negligible.
- 2. For a static `alpha` of 0.75, the number of invalid and off-waypoint actions increased somewhat.
- 3. This trend continued as `alpha` decreased to 0.5, 0.25, 0.1, 0.02, and 0.01.
+ 1. For a static `alpha` of 1, the difference in performance between a dynamic `alpha` is negligible. ![alpha=1](http://i.imgur.com/JhLKpqj.png)
+ 2. For a static `alpha` of 0.75, the number of invalid and off-waypoint actions increased somewhat. ![alpha=0.75](http://i.imgur.com/oo32sRR.png)
+ 3. This [trend continued](http://imgur.com/a/HJXmu) as `alpha` decreased to 0.5, 0.25, 0.1, 0.02, and 0.01.
 3. `gamma` (as hinted by the graphics above) was `0.03`.  This is primarily an attempt to suppress the "looping" tendency identified in the question above.  Interestingly, a `gamma` this low still allowed the smartcab to "learn" a good driving policy within a few trials.
- 1. At a `gamma` of 1, the smartcab's behavior tends depend on its very early encounters.  Sometimes, it reaches the target fairly frequently, but it takes unnecessary actions.  At other times, it prefers taking many unnecessary actions, and reaches the target far less frequently.
- 2. For `gammas` between 0.9 and 0.2, the car very quickly favors looping, and thus takes many unnecessary actions.
- 3. At a `gamma` of 0.2, the tendency to loop begins to diminish.
- 4. For `gammas` between 0.15 and 0, there is no noticeable difference in behavior.  Taking unnecessary actions and taking invalid actions are minimized.
+ 1. At a `gamma` of 1, the smartcab's behavior tends depend on its very early encounters.  Sometimes, it reaches the target fairly frequently, but it takes unnecessary actions. ![gamma=1](http://i.imgur.com/cWZpQHU.png)  At other times, it prefers taking many unnecessary actions, and reaches the target far less frequently. ![gamma=1, fail](http://i.imgur.com/JB0WriH.png)
+ 2. For `gammas` between 0.9 and 0.2, the car very quickly favors looping, and thus takes many unnecessary actions. ![gamma=0.90](http://i.imgur.com/F36frkd.png) ![gamma=0.70](http://i.imgur.com/1f7AExE.png) ![gamma=0.50](http://i.imgur.com/NQaZjKP.png) ![gamma=0.33](http://i.imgur.com/QVqShFa.png)
+ 3. At a `gamma` of 0.2, the tendency to loop begins to diminish. ![gamma=0.2](http://i.imgur.com/9McCyKR.png)
+ 4. For `gammas` between 0.15 and 0, there is no noticeable difference in behavior.  Taking unnecessary actions and taking invalid actions are minimized. ![gamma=0.15](http://i.imgur.com/6DmeMK4.png) ![gamma=0.10](http://i.imgur.com/hB4WhUb.png) ![gamma=0.03](http://i.imgur.com/8kezTZF.png) ![gamma=0.01](http://i.imgur.com/gMfXnAC.png) ![gamma=0.00](http://i.imgur.com/o7NBipc.png)
 4. The resulting driving agent prefers to identify a straight-line (Manhattan) path and follow it to the destination.  This agent does not opportunistically divert to side streets when it finds itself at a red light (the "looping" behaviour discussed aboved).  This agent obeys traffic signals, but occasionally acts in a way that would **cause a collision** with other vehicles on the roadway (yikes!).  The success rate of this agent rapidly approaches 1.0 over 100 trials.
 5. The occasional collisions, I assert, are because of a low number of trials relative to the probability of encountering any given other-vehicle configuration.  Since encountering other vehicles is relatively rare, the smartcab doesn't have time in only 100 trials to learn not to ram into them.
 6. By increasing the number of trials to 1000, the smartcab eventually encounters enough other-vehicle state-action pairs to "learn" the correct actions to take in those cases.
