@@ -87,4 +87,4 @@ _**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reac
    
    Since encountering other vehicles is relatively infrequent, and allows for comparatively more choices (from the above calculation, 90 of the 96 states involve other vehicles), a smartcab seeking the destination does not learn enough about other vehicles to know when not to make invalid or off-waypoint actions around them.
 
-![Error Table](http://i.imgur.com/cfqm8QY.png)
+   ![Error Table](http://i.imgur.com/cfqm8QY.png)
