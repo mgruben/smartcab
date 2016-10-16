@@ -26,9 +26,9 @@ _**QUESTION**: What states have you identified that are appropriate for modeling
 
 _**OPTIONAL**: How many states in total exist for the **smartcab** in this environment? Does this number seem reasonable given that the goal of Q-Learning is to learn and make informed decisions about each state? Why or why not?_
 
-1. From mere permutations of the `inputs` vector, there are 64 distinct states.  This is because there are two states for `light`, and four for each of `oncoming` and `left` (specifically, `None`, `forward`, `right`, and `left`).  (Note from the above question that `right` is being ignored, as it contains only redundant information).  Also, from `RoutePlanner.next_waypoint()`, there are three additional, distinct states (`right`, `left`, and `forward`).
+1. There are `96` distinct states which our **smartcab** should concern itself with.  This is because there are two states for `light`, and four for both `oncoming` and `left` (specifically, `None`, `forward`, `right`, and `left`).  (Note from the above question that `right` is being ignored, as it contains only redundant information).  Also, from `RoutePlanner.next_waypoint()`, there are three additional, distinct states (`right`, `left`, and `forward`).
 
-   Accordingly, there are a total of **192 distinct states** in this smartcab environment.
+   Accordingly, there are a total of `2 x 4 x 4 x 3 = 96` **distinct states** this smartcab environment.
 
     ```python
     {'next_waypoint': 'forward', 'green', 'oncoming': None, 'left': None}
@@ -38,7 +38,7 @@ _**OPTIONAL**: How many states in total exist for the **smartcab** in this envir
 
 2. This high number of states seems correct for the `agent` to have a full understanding of the intersection and its possible next actions.  Without an understanding this full, it seems unlikely that a **smartcab** would be able to explore alternative routes in case the chosen one is blocked.  
  * For instance, consider a smartcab approaching a red light, and intends to turn right at the intersection.  If another car approaches the intersection from the smartcab's left and intends to go forward, the smartcab must correctly ascertain that it must wait for the car to pass, even if the smartcab can legally turn right from a red light after having stopped first.  
- * Even though there are 192 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.
+ * Even though there are 96 distinct possible states, many of these states are invalid, since they would cause an accident even in the absence of the smartcab.  However, even strange accidents happen occasionally, so while the likelihood of many of the potential states is low, it's not zero, so the smartcab can't assume they'll never occur.  But, note that within the confines of this assignment, other actors are presumed to make only valid decisions, so there will be some of the `96` states which our **smartcab** never sees (e.g. perpendicular traffic disobeying their red lights).
 
 _**QUESTION**: What changes do you notice in the agent's behavior when compared to the basic driving agent when random actions were always taken? Why is this behavior occurring?_
 
