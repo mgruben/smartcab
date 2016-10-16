@@ -30,7 +30,7 @@ class LearningAgent(Agent):
         self.state = None
         
         # Initialize variables for statistics tracking
-        self.N = 100
+        self.N = 1000
         self.success = np.zeros(self.N)
         self.invalid = np.zeros(self.N)
         self.wander = np.zeros(self.N)
@@ -189,13 +189,11 @@ class LearningAgent(Agent):
         # Learn policy based on state, action, reward
         
         # Store the current state in a temporary variable, then
-        # update the current state.
+        # update the current state to s' ("state prime")
         last_state = self.state
-        
-        # Look ahead one turn to find s' ("state prime")
         self.set_state()
 
-        # Determine the utility of the next state.
+        # Determine the utility of the new state.
         # 
         # While previously we were concerned with which action to take,
         # here we are concerned with the greatest possible Q-value from
@@ -209,8 +207,8 @@ class LearningAgent(Agent):
                 action_prime), self.optimism)
         self.maxQ_new = max(self.weights)
         
-        # Update Q for the current state with the just-calculated
-        # utility for the next state
+        # Update Q for the last state with the just-calculated
+        # utility for the new state
         # 
         # This is the equation from the "Estimating Q from Transitions"
         # Udacity video
@@ -281,7 +279,7 @@ def run():
     sim = Simulator(e, update_delay=0, display=False)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
-    N = 100
+    N = 1000
     sim.run(n_trials=N)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
