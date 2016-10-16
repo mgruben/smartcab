@@ -182,11 +182,12 @@ class LearningAgent(Agent):
         
         # Learn policy based on state, action, reward
         
-        # Look ahead one turn to find s' (state_prime)
-        self.next_waypoint = self.planner.next_waypoint()
-        inputs = self.env.sense(self)
-        self.state_prime = (self.next_waypoint, inputs['light'],
-            inputs['left'], inputs['oncoming'])
+        # Store the current state in a temporary variable, then
+        # update the current state.
+        last_state = self.state
+        
+        # Look ahead one turn to find s' ("state prime")
+        self.set_state()
 
         # Determine the utility of the next state.
         # 
@@ -198,7 +199,7 @@ class LearningAgent(Agent):
         # state-action pair, we award a high initial Q value to favor
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
-            self.weights[i] = self.Qtable.setdefault((self.state_prime,
+            self.weights[i] = self.Qtable.setdefault((self.state,
                 action_prime), 5)
         self.maxQ_new = max(self.weights)
         
@@ -207,13 +208,13 @@ class LearningAgent(Agent):
         # 
         # This is the equation from the "Estimating Q from Transitions"
         # Udacity video
-        self.Qtable[(self.state, action)] = \
-            (1.0 - self.alpha) * self.Qtable[(self.state, action)] + \
+        self.Qtable[(last_state, action)] = \
+            (1.0 - self.alpha) * self.Qtable[(last_state, action)] + \
             self.alpha * (reward + self.gamma * self.maxQ_new)
         
 
         print "LearningAgent.update(): " + \
-        "deadline = {}, state = {}, ".format(deadline, self.state) + \
+        "deadline = {}, state = {}, ".format(deadline, last_state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
 def scatter(a, t):
