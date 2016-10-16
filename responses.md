@@ -84,6 +84,7 @@ _**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reac
 4. The following is a chronological ordering of the errors which the **smartcab** makes.  Note that, for the most part, the smartcab first explores what to do at empty intersections (i.e. based solely off of `light` and `waypoint` information).  The smartcab next makes periodic incorrect actions at intersections with other vehicles.
 
    This makes sense, since there are only **24** possibilities for an empty intersection (`2` states for light and `3` states for waypoint yields `6` total states, and there are `4` possible actions to take in each of those states), and since the field is relatively empty of other vehicles, the **smartcab** learns a lot about those states quickly.  
+   
    Since encountering other vehicles is relatively infrequent, and allows for comparatively more choices (from the above calculation, 90 of the 96 states involve other vehicles), a smartcab seeking the destination does not learn enough about other vehicles to know when not to make invalid or off-waypoint actions around them.
 
 ![Error Table](http://i.imgur.com/cfqm8QY.png)
