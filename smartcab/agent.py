@@ -236,13 +236,16 @@ class LearningAgent(Agent):
         elif reward > 9: # destination reached by off-waypoint action
             self.success[self.trial] = 1
             self.trial += 1
+            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
             self.wander[self.trial] += 1
         elif deadline == 0:
             self.trial += 1
             self.trips_failed += 1
         elif reward == -1:
+            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
             self.invalid[self.trial] += 1
         elif reward == -0.5:
+            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
             self.wander[self.trial] += 1
         
         
@@ -279,9 +282,9 @@ class LearningAgent(Agent):
             self.alpha * (reward + self.gamma * self.maxQ_new)
         
 
-        print "LearningAgent.update(): " + \
-        "deadline = {}, state = {}, ".format(deadline, self.state) + \
-        " action = {}, reward = {}".format(action, reward)  # [debug]
+        # print "LearningAgent.update(): " + \
+        # "deadline = {}, state = {}, ".format(deadline, self.state) + \
+        # " action = {}, reward = {}".format(action, reward)  # [debug]
 
 def scatter(a, t):
     plt.plot(a, "o")
