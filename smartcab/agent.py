@@ -278,7 +278,7 @@ def run():
     # allow longer trials
     
     # create simulator (uses pygame when display=True, if available)
-    sim = Simulator(e, update_delay=0.1, display=True)
+    sim = Simulator(e, update_delay=0, display=False)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
     N = 100
