@@ -30,7 +30,7 @@ class LearningAgent(Agent):
         self.state = None
         
         # Initialize variables for statistics tracking
-        self.N = 1000
+        self.N = 100
         self.success = np.zeros(self.N)
         self.invalid = np.zeros(self.N)
         self.wander = np.zeros(self.N)
@@ -43,6 +43,7 @@ class LearningAgent(Agent):
         self.Qiterations = {} # used to reduce alpha
         self.alpha = 1 # initial learning rate
         self.gamma = 0.03 # the discount factor
+        self.optimism = 5 # the Q-Value to assign new states
         '''
         At a gamma of 1, the car remains stationary always.
         At a gamma of 0.9, the car very quickly favors looping.
@@ -126,7 +127,12 @@ class LearningAgent(Agent):
         invalid (harmful, dangerous, illegal) actions.
         '''
         # Begin by initializing the smartcab's state vector
-        self.set_state()
+        #
+        # Note that this only needs to be done once, after which the
+        # calculation of s' below will serve as the current state
+        # vector.
+        if self.state == None:
+            self.set_state()
         
         # Get the current deadline
         deadline = self.env.get_deadline(self)
@@ -140,7 +146,7 @@ class LearningAgent(Agent):
         # traverse the reward-space during training.
         for i, action in enumerate(self.actions):
             self.weights[i] = \
-                self.Qtable.setdefault((self.state, action), 5)
+                self.Qtable.setdefault((self.state, action), self.optimism)
 
         # The next action is the highest-Q-value action
         # if tie, the next action is randomly chosen from among ties
@@ -169,7 +175,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         
         # Track statistics
-        if reward == 12:
+        if reward > 10:
             self.success[self.trial] = 1
             self.trial += 1
         elif reward == -1:
@@ -200,7 +206,7 @@ class LearningAgent(Agent):
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
             self.weights[i] = self.Qtable.setdefault((self.state,
-                action_prime), 5)
+                action_prime), self.optimism)
         self.maxQ_new = max(self.weights)
         
         # Update Q for the current state with the just-calculated
@@ -229,10 +235,12 @@ def nanCatZero(a):
     return [float('nan') if x == 0 else x for x in a]
     
 def allScatter(a, N):
+    print(a.success)
     success = nanCatOne(a.success)
+    print(success)
     m = 4
     l = len(success)
-    w = 33
+    w = 5
     plt.plot(success, "v", label="Trip Failed", color="green", markersize=2*m)
     
     plt.plot(pd.rolling_mean(a.invalid, window=w), label="Rolling invalid mean", color = "blue")
@@ -270,10 +278,10 @@ def run():
     # allow longer trials
     
     # create simulator (uses pygame when display=True, if available)
-    sim = Simulator(e, update_delay=0, display=False)
+    sim = Simulator(e, update_delay=0.1, display=True)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
-    N = 1000
+    N = 100
     sim.run(n_trials=N)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
