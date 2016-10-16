@@ -236,16 +236,16 @@ class LearningAgent(Agent):
         elif reward > 9: # destination reached by off-waypoint action
             self.success[self.trial] = 1
             self.trial += 1
-            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
+            print "Negative {},{},{},{},{},{},{}".format(self.trial, self.state[0], self.state[1], self.state[2], self.state[3], action, reward)
             self.wander[self.trial] += 1
         elif deadline == 0:
             self.trial += 1
             self.trips_failed += 1
         elif reward == -1:
-            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
+            print "Negative {},{},{},{},{},{},{}".format(self.trial, self.state[0], self.state[1], self.state[2], self.state[3], action, reward)
             self.invalid[self.trial] += 1
         elif reward == -0.5:
-            print "Negative reward: state = {}, action = {}, reward = {}".format(self.state, action, reward)
+            print "Negative {},{},{},{},{},{},{}".format(self.trial, self.state[0], self.state[1], self.state[2], self.state[3], action, reward)
             self.wander[self.trial] += 1
         
         
