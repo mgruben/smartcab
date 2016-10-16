@@ -59,6 +59,38 @@ class LearningAgent(Agent):
         # TODO: Prepare for a new trip; reset any variables here, if
         # required
 
+    def set_state(self):
+        '''
+        Sets the state vector of the smartcab, according to
+        (1) the next waypoint,
+        (2) the color of the light,
+        (3) the heading of traffic approaching from the left, and
+        (4) the heading of oncoming traffic.
+        '''
+        # Gather inputs
+        # from route planner, also displayed by simulator
+        # 
+        # This is the only way the smartcab has an idea of which
+        # direction it _should_ be taking.
+        #
+        # Otherwise, until the car reached the destination, it could
+        # only receive negative feedback, such as when it collides with
+        # another car, or when it disobeys a traffic signal.
+        # 
+        # Very quickly, then, this would lead the car to remain
+        # stationary (and wait for the destination to come to it?).
+        self.next_waypoint = self.planner.next_waypoint()
+        
+        
+        # Light color, and the heading of traffic, if any, from
+        # (1) oncoming, (2) right, and (3) left
+        inputs = self.env.sense(self)
+
+        # Update state with the suggested action along with
+        # raw values from inputs, ordered to clockwise orientation
+        self.state = (self.next_waypoint, inputs['light'], 
+            inputs['left'], inputs['oncoming'])
+    
     def update(self, t):
         '''
         Takes the next "best" action as defined by the Q-Learning
@@ -93,30 +125,11 @@ class LearningAgent(Agent):
         get to its destination along the best route, without taking
         invalid (harmful, dangerous, illegal) actions.
         '''
-        # Gather inputs
-        # from route planner, also displayed by simulator
-        # 
-        # This is the only way the smartcab has an idea of which
-        # direction it _should_ be taking.
-        #
-        # Otherwise, until the car reached the destination, it could
-        # only receive negative feedback, such as when it collides with
-        # another car, or when it disobeys a traffic signal.
-        # 
-        # Very quickly, then, this would lead the car to remain
-        # stationary (and wait for the destination to come to it?).
-        self.next_waypoint = self.planner.next_waypoint()
+        # Begin by initializing the smartcab's state vector
+        self.set_state()
         
-        
-        # Light color, and the heading of traffic, if any, from
-        # (1) oncoming, (2) right, and (3) left
-        inputs = self.env.sense(self)
+        # Get the current deadline
         deadline = self.env.get_deadline(self)
-
-        # Update state with the suggested action along with
-        # raw values from inputs, ordered to clockwise orientation
-        self.state = (self.next_waypoint, inputs['light'], 
-            inputs['left'], inputs['oncoming'])
         
         # Select action according to your policy
         # If a state-action pair hasn't been considered yet, award
@@ -169,11 +182,12 @@ class LearningAgent(Agent):
         
         # Learn policy based on state, action, reward
         
-        # Look ahead one turn to find s' (state_prime)
-        self.next_waypoint = self.planner.next_waypoint()
-        inputs = self.env.sense(self)
-        self.state_prime = (self.next_waypoint, inputs['light'],
-            inputs['left'], inputs['oncoming'])
+        # Store the current state in a temporary variable, then
+        # update the current state.
+        last_state = self.state
+        
+        # Look ahead one turn to find s' ("state prime")
+        self.set_state()
 
         # Determine the utility of the next state.
         # 
@@ -185,7 +199,7 @@ class LearningAgent(Agent):
         # state-action pair, we award a high initial Q value to favor
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
-            self.weights[i] = self.Qtable.setdefault((self.state_prime,
+            self.weights[i] = self.Qtable.setdefault((self.state,
                 action_prime), 5)
         self.maxQ_new = max(self.weights)
         
@@ -194,13 +208,13 @@ class LearningAgent(Agent):
         # 
         # This is the equation from the "Estimating Q from Transitions"
         # Udacity video
-        self.Qtable[(self.state, action)] = \
-            (1.0 - self.alpha) * self.Qtable[(self.state, action)] + \
+        self.Qtable[(last_state, action)] = \
+            (1.0 - self.alpha) * self.Qtable[(last_state, action)] + \
             self.alpha * (reward + self.gamma * self.maxQ_new)
         
 
         print "LearningAgent.update(): " + \
-        "deadline = {}, state = {}, ".format(deadline, self.state) + \
+        "deadline = {}, state = {}, ".format(deadline, last_state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
 def scatter(a, t):
