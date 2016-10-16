@@ -81,3 +81,43 @@ _**QUESTION**: Does your agent get close to finding an optimal policy, i.e. reac
  2. For the remaining trials, the agent will occasionally encounter other vehicles.  As it encounters other vehicles rarely, it is uncertain of the action it should take in these cases.  This usually results in collisions.  
  3. After each of these collisions, the agent learns not to act in that particular way (e.g. turn left) in that particular state (e.g. on a red light with no other cars around) again.  After about 100 trials, the agent has learned enough to mostly avoid colliding with other vehicles while on the roadway.
 3. While none of the `alpha` or `gamma` values used in this exercise resulted in the above **optimal policy**, when `alpha = 1` and `gamma = 0.03`, the smartcab came the closest to the optimal polocy.  In those trials, over 100 runs, only about 3-4 trips were failed, only about 20 invalid actions were taken (i.e. disobeying traffic laws), and only about 20 off-waypoint actions (i.e. actions which didn't match the Route Planner's suggested next action) were taken.  These rates place it well below human drivers in terms of performance, so such an actor should _definitely_ not be set loose on the roads.  Nevertheless, it is an impressive accomplishment for such a simple algorithm to produce.
+4. The following is a chronological ordering of the errors which the **smartcab** makes.  Note that, for the most part, the smartcab first explores what to do at empty intersections (i.e. based solely off of `light` and `waypoint` information).  The smartcab next makes periodic incorrect actions at intersections with other vehicles.
+
+   This makes sense, since there are only **24** possibilities for an empty intersection (`2` states for light and `3` states for waypoint yields `6` total states, and there are `4` possible actions to take in each of those states), and since the field is relatively empty of other vehicles, the **smartcab** learns a lot about those states quickly.  
+   Since encountering other vehicles is relatively infrequent, and allows for comparatively more choices (from the above calculation, 90 of the 96 states involve other vehicles), a smartcab seeking the destination does not learn enough about other vehicles to know when not to make invalid or off-waypoint actions around them.
+
+|Trial|Next Waypoint|Light|Left|Oncoming|Action|Reward|
+|:---:||:---:|:---:|:---:|:---:|:---:|
+|0|left|red|None|None|forward|-1.0
+|0|left|red|None|None|left|-1.0
+|0|left|green|None|None|forward|-0.5
+|0|left|red|None|None|right|-0.5
+|0|right|red|None|None|forward|-1.0
+|0|right|green|None|None|forward|-0.5
+|0|right|green|None|None|left|-0.5
+|0|forward|green|None|None|right|-0.5
+|0|left|green|None|None|right|-0.5
+|0|forward|green|None|None|left|-0.5
+|0|forward|red|None|None|left|-1.0
+|0|forward|red|None|None|right|-0.5
+|1|right|red|None|None|left|-1.0
+|2|forward|red|forward|None|left|-1.0
+|2|forward|red|None|None|forward|-1.0
+|7|forward|red|None|left|forward|-1.0
+|15|forward|red|None|left|right|-0.5
+|18|forward|red|None|left|left|-1.0
+|20|forward|green|forward|None|right|-0.5
+|21|left|red|None|forward|right|-0.5
+|22|forward|green|None|forward|left|-1.0
+|23|forward|red|right|None|forward|-1.0
+|24|left|red|right|None|right|-0.5
+|34|forward|green|left|None|left|-0.5
+|36|right|red|None|forward|forward|-1.0
+|39|forward|red|right|None|left|-1.0
+|41|left|green|forward|None|forward|-0.5
+|44|forward|green|None|forward|right|-0.5
+|49|forward|red|None|forward|left|-1.0
+|49|forward|red|None|forward|right|-0.5
+|54|forward|red|right|None|right|-0.5
+|61|left|red|left|None|right|-0.5
+|67|forward|red|None|forward|forward|-1.0
