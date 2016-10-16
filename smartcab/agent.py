@@ -59,6 +59,38 @@ class LearningAgent(Agent):
         # TODO: Prepare for a new trip; reset any variables here, if
         # required
 
+    def set_state(self):
+        '''
+        Sets the state vector of the smartcab, according to
+        (1) the next waypoint,
+        (2) the color of the light,
+        (3) the heading of traffic approaching from the left, and
+        (4) the heading of oncoming traffic.
+        '''
+        # Gather inputs
+        # from route planner, also displayed by simulator
+        # 
+        # This is the only way the smartcab has an idea of which
+        # direction it _should_ be taking.
+        #
+        # Otherwise, until the car reached the destination, it could
+        # only receive negative feedback, such as when it collides with
+        # another car, or when it disobeys a traffic signal.
+        # 
+        # Very quickly, then, this would lead the car to remain
+        # stationary (and wait for the destination to come to it?).
+        self.next_waypoint = self.planner.next_waypoint()
+        
+        
+        # Light color, and the heading of traffic, if any, from
+        # (1) oncoming, (2) right, and (3) left
+        inputs = self.env.sense(self)
+
+        # Update state with the suggested action along with
+        # raw values from inputs, ordered to clockwise orientation
+        self.state = (self.next_waypoint, inputs['light'], 
+            inputs['left'], inputs['oncoming'])
+    
     def update(self, t):
         '''
         Takes the next "best" action as defined by the Q-Learning
@@ -93,30 +125,11 @@ class LearningAgent(Agent):
         get to its destination along the best route, without taking
         invalid (harmful, dangerous, illegal) actions.
         '''
-        # Gather inputs
-        # from route planner, also displayed by simulator
-        # 
-        # This is the only way the smartcab has an idea of which
-        # direction it _should_ be taking.
-        #
-        # Otherwise, until the car reached the destination, it could
-        # only receive negative feedback, such as when it collides with
-        # another car, or when it disobeys a traffic signal.
-        # 
-        # Very quickly, then, this would lead the car to remain
-        # stationary (and wait for the destination to come to it?).
-        self.next_waypoint = self.planner.next_waypoint()
+        # Begin by initializing the smartcab's state vector
+        self.set_state()
         
-        
-        # Light color, and the heading of traffic, if any, from
-        # (1) oncoming, (2) right, and (3) left
-        inputs = self.env.sense(self)
+        # Get the current deadline
         deadline = self.env.get_deadline(self)
-
-        # Update state with the suggested action along with
-        # raw values from inputs, ordered to clockwise orientation
-        self.state = (self.next_waypoint, inputs['light'], 
-            inputs['left'], inputs['oncoming'])
         
         # Select action according to your policy
         # If a state-action pair hasn't been considered yet, award
