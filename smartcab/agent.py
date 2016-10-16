@@ -29,7 +29,7 @@ class LearningAgent(Agent):
         self.state = None
         
         # Initialize variables for statistics tracking
-        self.N = 1000
+        self.N = 100
         self.success = np.zeros(self.N)
         self.invalid = np.zeros(self.N)
         self.wander = np.zeros(self.N)
@@ -341,7 +341,7 @@ def run():
     sim = Simulator(e, update_delay=0, display=False)
     # NOTE: To speed up simulation, reduce update_delay and/or set
     # display=False
-    N = 1000
+    N = 100
     sim.run(n_trials=N)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit
     # Ctrl+C on the command-line
