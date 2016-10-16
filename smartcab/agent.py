@@ -43,6 +43,7 @@ class LearningAgent(Agent):
         self.Qiterations = {} # used to reduce alpha
         self.alpha = 1 # initial learning rate
         self.gamma = 0.03 # the discount factor
+        self.optimism = 5 # the Q-Value to assign new states
         '''
         At a gamma of 1, the car remains stationary always.
         At a gamma of 0.9, the car very quickly favors looping.
@@ -126,7 +127,12 @@ class LearningAgent(Agent):
         invalid (harmful, dangerous, illegal) actions.
         '''
         # Begin by initializing the smartcab's state vector
-        self.set_state()
+        #
+        # Note that this only needs to be done once, after which the
+        # calculation of s' below will serve as the current state
+        # vector.
+        if self.state == None:
+            self.set_state()
         
         # Get the current deadline
         deadline = self.env.get_deadline(self)
@@ -140,7 +146,7 @@ class LearningAgent(Agent):
         # traverse the reward-space during training.
         for i, action in enumerate(self.actions):
             self.weights[i] = \
-                self.Qtable.setdefault((self.state, action), 5)
+                self.Qtable.setdefault((self.state, action), self.optimism)
 
         # The next action is the highest-Q-value action
         # if tie, the next action is randomly chosen from among ties
@@ -169,7 +175,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         
         # Track statistics
-        if reward == 12:
+        if reward > 10:
             self.success[self.trial] = 1
             self.trial += 1
         elif reward == -1:
@@ -183,13 +189,11 @@ class LearningAgent(Agent):
         # Learn policy based on state, action, reward
         
         # Store the current state in a temporary variable, then
-        # update the current state.
+        # update the current state to s' ("state prime")
         last_state = self.state
-        
-        # Look ahead one turn to find s' ("state prime")
         self.set_state()
 
-        # Determine the utility of the next state.
+        # Determine the utility of the new state.
         # 
         # While previously we were concerned with which action to take,
         # here we are concerned with the greatest possible Q-value from
@@ -200,11 +204,11 @@ class LearningAgent(Agent):
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
             self.weights[i] = self.Qtable.setdefault((self.state,
-                action_prime), 5)
+                action_prime), self.optimism)
         self.maxQ_new = max(self.weights)
         
-        # Update Q for the current state with the just-calculated
-        # utility for the next state
+        # Update Q for the last state with the just-calculated
+        # utility for the new state
         # 
         # This is the equation from the "Estimating Q from Transitions"
         # Udacity video
@@ -229,10 +233,12 @@ def nanCatZero(a):
     return [float('nan') if x == 0 else x for x in a]
     
 def allScatter(a, N):
+    print(a.success)
     success = nanCatOne(a.success)
+    print(success)
     m = 4
     l = len(success)
-    w = 33
+    w = 5
     plt.plot(success, "v", label="Trip Failed", color="green", markersize=2*m)
     
     plt.plot(pd.rolling_mean(a.invalid, window=w), label="Rolling invalid mean", color = "blue")
