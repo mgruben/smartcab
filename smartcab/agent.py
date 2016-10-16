@@ -43,6 +43,7 @@ class LearningAgent(Agent):
         self.Qiterations = {} # used to reduce alpha
         self.alpha = 1 # initial learning rate
         self.gamma = 0.03 # the discount factor
+        self.optimism = 5 # the Q-Value to assign new states
         '''
         At a gamma of 1, the car remains stationary always.
         At a gamma of 0.9, the car very quickly favors looping.
@@ -59,17 +60,15 @@ class LearningAgent(Agent):
         # TODO: Prepare for a new trip; reset any variables here, if
         # required
 
-    def set_state(self):
+    def get_state(self):
         '''
-        Sets the state vector of the smartcab, according to
+        Returns the state vector of the smartcab, according to
         (1) the next waypoint,
         (2) the color of the light,
         (3) the heading of traffic approaching from the left, and
         (4) the heading of oncoming traffic.
         '''
-        # Gather inputs
-        # from route planner, also displayed by simulator
-        # 
+        
         # This is the only way the smartcab has an idea of which
         # direction it _should_ be taking.
         #
@@ -81,14 +80,15 @@ class LearningAgent(Agent):
         # stationary (and wait for the destination to come to it?).
         self.next_waypoint = self.planner.next_waypoint()
         
-        
+        # Gather inputs
+        # from route planner, also displayed by simulator
         # Light color, and the heading of traffic, if any, from
         # (1) oncoming, (2) right, and (3) left
         inputs = self.env.sense(self)
 
-        # Update state with the suggested action along with
+        # return state with the suggested action along with
         # raw values from inputs, ordered to clockwise orientation
-        self.state = (self.next_waypoint, inputs['light'], 
+        return (self.next_waypoint, inputs['light'], 
             inputs['left'], inputs['oncoming'])
     
     def update(self, t):
@@ -126,7 +126,7 @@ class LearningAgent(Agent):
         invalid (harmful, dangerous, illegal) actions.
         '''
         # Begin by initializing the smartcab's state vector
-        self.set_state()
+        self.state = self.get_state()
         
         # Get the current deadline
         deadline = self.env.get_deadline(self)
@@ -140,7 +140,7 @@ class LearningAgent(Agent):
         # traverse the reward-space during training.
         for i, action in enumerate(self.actions):
             self.weights[i] = \
-                self.Qtable.setdefault((self.state, action), 5)
+                self.Qtable.setdefault((self.state, action), self.optimism)
 
         # The next action is the highest-Q-value action
         # if tie, the next action is randomly chosen from among ties
@@ -169,7 +169,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         
         # Track statistics
-        if reward == 12:
+        if reward > 10:
             self.success[self.trial] = 1
             self.trial += 1
         elif reward == -1:
@@ -182,14 +182,14 @@ class LearningAgent(Agent):
         
         # Learn policy based on state, action, reward
         
-        # Store the current state in a temporary variable, then
-        # update the current state.
-        last_state = self.state
-        
-        # Look ahead one turn to find s' ("state prime")
-        self.set_state()
+        # Peek ahead to store the next state to s' (state_prime)
+        # 
+        # It is important _not_ to set the state here, or else
+        # we break the implementation of the Q-learning algorithm's
+        # value updating
+        state_prime = self.get_state()
 
-        # Determine the utility of the next state.
+        # Determine the utility of the new state.
         # 
         # While previously we were concerned with which action to take,
         # here we are concerned with the greatest possible Q-value from
@@ -199,8 +199,8 @@ class LearningAgent(Agent):
         # state-action pair, we award a high initial Q value to favor
         # exploring new options.
         for i, action_prime in enumerate(self.actions):
-            self.weights[i] = self.Qtable.setdefault((self.state,
-                action_prime), 5)
+            self.weights[i] = self.Qtable.setdefault((state_prime,
+                action_prime), self.optimism)
         self.maxQ_new = max(self.weights)
         
         # Update Q for the current state with the just-calculated
@@ -208,13 +208,13 @@ class LearningAgent(Agent):
         # 
         # This is the equation from the "Estimating Q from Transitions"
         # Udacity video
-        self.Qtable[(last_state, action)] = \
-            (1.0 - self.alpha) * self.Qtable[(last_state, action)] + \
+        self.Qtable[(self.state, action)] = \
+            (1.0 - self.alpha) * self.Qtable[(self.state, action)] + \
             self.alpha * (reward + self.gamma * self.maxQ_new)
         
 
         print "LearningAgent.update(): " + \
-        "deadline = {}, state = {}, ".format(deadline, last_state) + \
+        "deadline = {}, state = {}, ".format(deadline, self.state) + \
         " action = {}, reward = {}".format(action, reward)  # [debug]
 
 def scatter(a, t):
@@ -229,10 +229,12 @@ def nanCatZero(a):
     return [float('nan') if x == 0 else x for x in a]
     
 def allScatter(a, N):
+    print(a.success)
     success = nanCatOne(a.success)
+    print(success)
     m = 4
     l = len(success)
-    w = 33
+    w = 5
     plt.plot(success, "v", label="Trip Failed", color="green", markersize=2*m)
     
     plt.plot(pd.rolling_mean(a.invalid, window=w), label="Rolling invalid mean", color = "blue")
