@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
 
@@ -169,16 +168,83 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         
         # Track statistics
-        if reward > 10:
+        
+        # Generally, we want to consider the trial over if the smartcab
+        # reaches its destination.
+        #
+        # Generally, when the smartcab reaches its destination, it
+        # receives a reward of 12.
+        # This is generally because the smartcab (1) took a valid action
+        # which agreed with the next waypoint (reward = 2), _and_
+        # because it reached the destination (reward += 10).
+        # 
+        # However, the Route Planner is **not** perfect, and will
+        # very rarely suggest a path to the smartcab which is not the
+        # correct next move to get closer to the destination.
+        # This is probably due to the grid being continuous, rather than
+        # bounded and purely Euclidean, space (e.g. can travel left by
+        # going far enough right).
+        # 
+        # For example:
+        '''
+        Simulator.run(): Trial 757
+        Environment.reset(): Trial set up with start = (6, 6), destination = (6, 1), deadline = 25
+        RoutePlanner.route_to(): destination = (6, 1)
+        Environment.act(): Primary agent has reached destination!
+        LearningAgent.update(): deadline = 25, state = ('right', 'green', 'right', None),  action = left, reward = 9.5 trial: = 758
+        
+        Simulator.run(): Trial 30
+        Environment.reset(): Trial set up with start = (4, 6), destination = (3, 1), deadline = 30
+        RoutePlanner.route_to(): destination = (3, 1)
+        LearningAgent.update(): deadline = 30, state = ('left', 'red', None, None),  action = None, reward = 0.0 trial: = 30
+        LearningAgent.update(): deadline = 29, state = ('left', 'red', None, None),  action = None, reward = 0.0 trial: = 30
+        LearningAgent.update(): deadline = 28, state = ('left', 'red', None, None),  action = None, reward = 0.0 trial: = 30
+        LearningAgent.update(): deadline = 27, state = ('left', 'red', None, None),  action = None, reward = 0.0 trial: = 30
+        LearningAgent.update(): deadline = 26, state = ('left', 'green', None, None),  action = left, reward = 2.0 trial: = 30
+        Environment.act(): Primary agent has reached destination!
+        LearningAgent.update(): deadline = 25, state = ('right', 'green', 'right', None),  action = left, reward = 9.5 trial: = 31
+
+        Simulator.run(): Trial 77
+        Environment.reset(): Trial set up with start = (8, 2), destination = (3, 6), deadline = 45
+        RoutePlanner.route_to(): destination = (3, 6)
+        LearningAgent.update(): deadline = 45, state = ('right', 'red', None, None),  action = right, reward = 2.0 trial: = 77
+        LearningAgent.update(): deadline = 44, state = ('forward', 'green', None, None),  action = forward, reward = 2.0 trial: = 77
+        LearningAgent.update(): deadline = 43, state = ('forward', 'green', None, None),  action = forward, reward = 2.0 trial: = 77
+        LearningAgent.update(): deadline = 42, state = ('forward', 'green', None, None),  action = forward, reward = 2.0 trial: = 77
+        LearningAgent.update(): deadline = 41, state = ('forward', 'red', None, None),  action = None, reward = 0.0 trial: = 77
+        LearningAgent.update(): deadline = 40, state = ('forward', 'red', None, None),  action = None, reward = 0.0 trial: = 77
+        LearningAgent.update(): deadline = 39, state = ('forward', 'green', None, None),  action = forward, reward = 2.0 trial: = 77
+        LearningAgent.update(): deadline = 38, state = ('left', 'red', None, 'forward'),  action = right, reward = -0.5 trial: = 77
+        LearningAgent.update(): deadline = 37, state = ('right', 'red', None, 'left'),  action = forward, reward = -1.0 trial: = 77
+        Environment.act(): Primary agent has reached destination!
+        LearningAgent.update(): deadline = 36, state = ('right', 'green', None, 'left'),  action = forward, reward = 9.5 trial: = 78
+
+        '''
+        # In those certainstances, if the smartcab's next move is
+        # (a) against the Route Planner (e.g. reward = -0.5), but
+        # (b) gets the smartcab to the destination (reward += 10),
+        # the smartcab will receive a reward of 9.5!!!
+        #
+        # Accordingly, we need to check whether the reward the smartcab
+        # received on this iteration is greater than 9, because the
+        # _only_ way that will occur is if the smartcab has, somehow,
+        # reached the destination.
+        
+        if reward > 10: # destination reached by on-waypoint action
             self.success[self.trial] = 1
             self.trial += 1
-        elif reward == -1:
-            self.invalid[self.trial] += 1
-        elif reward == -0.5:
+        elif reward > 9: # destination reached by off-waypoint action
+            self.success[self.trial] = 1
+            self.trial += 1
             self.wander[self.trial] += 1
         elif deadline == 0:
             self.trial += 1
             self.trips_failed += 1
+        elif reward == -1:
+            self.invalid[self.trial] += 1
+        elif reward == -0.5:
+            self.wander[self.trial] += 1
+        
         
         # Learn policy based on state, action, reward
         
